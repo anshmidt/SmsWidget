@@ -102,12 +102,11 @@ object SmsWidget : GlanceAppWidget() {
     private fun SendingProgressBar() {
         Box(
             modifier = GlanceModifier
-                .wrapContentSize()
+                .size(44.dp)
                 .clickable(onClick = actionRunCallback(SendButtonClickCallback::class.java)),
             contentAlignment = Alignment.Center
         ) {
             CircularProgressIndicator(
-                modifier = GlanceModifier.size(44.dp),
                 color = ColorProvider(day = Red, night = Red)
             )
         }
@@ -169,7 +168,7 @@ object SmsWidget : GlanceAppWidget() {
         Box(
             modifier = GlanceModifier
                 .background(ImageProvider(R.drawable.circle_button_background))
-                .wrapContentSize()
+                .size(44.dp)
                 .clickable(onClick = actionRunCallback(SendButtonClickCallback::class.java)),
             contentAlignment = Alignment.Center
         ) {
