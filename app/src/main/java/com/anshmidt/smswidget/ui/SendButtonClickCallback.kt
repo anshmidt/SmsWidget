@@ -14,7 +14,8 @@ class SendButtonClickCallback : ActionCallback {
         parameters: ActionParameters
     ) {
         updateAppWidgetState(context, glanceId) { prefs ->
-            prefs[SmsWidget.isLoadingKey] = true
+            val currentIsLoadingValue = prefs[SmsWidget.isLoadingKey] ?: false
+            prefs[SmsWidget.isLoadingKey] = currentIsLoadingValue.not()
         }
         SmsWidget.update(context, glanceId)
     }

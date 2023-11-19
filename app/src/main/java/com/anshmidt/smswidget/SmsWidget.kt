@@ -2,12 +2,9 @@ package com.anshmidt.smswidget
 
 import android.content.Context
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.datastore.preferences.core.booleanPreferencesKey
-import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.glance.*
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.CircularProgressIndicator
@@ -20,7 +17,6 @@ import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import com.anshmidt.smswidget.ui.SendButtonClickCallback
-import com.anshmidt.smswidget.ui.cornerRadiusCompat
 import com.anshmidt.smswidget.ui.theme.Red
 import com.anshmidt.smswidget.ui.theme.TranslucentBlack
 import com.anshmidt.smswidget.ui.theme.White
@@ -50,11 +46,7 @@ object SmsWidget : GlanceAppWidget() {
             horizontalAlignment = Alignment.Horizontal.Start
         ) {
             Title()
-            if (isLoading) {
-                LoadingRow()
-            } else {
-                WidgetCircularButtonRow()
-            }
+            WidgetRow(isLoading = isLoading)
         }
     }
 
@@ -72,7 +64,7 @@ object SmsWidget : GlanceAppWidget() {
     }
 
     @Composable
-    private fun WidgetCircularButtonRow() {
+    private fun WidgetRow(isLoading: Boolean) {
         Row(
             horizontalAlignment = Alignment.Start,
             modifier = GlanceModifier
@@ -98,7 +90,26 @@ object SmsWidget : GlanceAppWidget() {
                 )
             )
 
-            CircleButton()
+            if (isLoading) {
+                SendingProgressBar()
+            } else {
+                CircleButton()
+            }
+        }
+    }
+    
+    @Composable
+    private fun SendingProgressBar() {
+        Box(
+            modifier = GlanceModifier
+                .wrapContentSize()
+                .clickable(onClick = actionRunCallback(SendButtonClickCallback::class.java)),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator(
+                modifier = GlanceModifier.size(44.dp),
+                color = ColorProvider(day = Red, night = Red)
+            )
         }
     }
 
@@ -217,39 +228,6 @@ object SmsWidget : GlanceAppWidget() {
                 ),
                 contentDescription = "Send SMS",
                 provider = ImageProvider(R.drawable.ic_send_sms)
-            )
-        }
-    }
-
-    @Composable
-    private fun LoadingRow() {
-        Row(
-            horizontalAlignment = Alignment.Start,
-            modifier = GlanceModifier
-                .padding(8.dp)
-        ) {
-            Text(
-                text = "9011:",
-                modifier = GlanceModifier.padding(start = 0.dp, end = 0.dp,top = 8.dp, bottom = 8.dp),
-                style = TextStyle(
-                    fontWeight = FontWeight.Normal,
-                    fontSize = 18.sp,
-                    color = ColorProvider(day = White, night = White)
-                )
-            )
-
-            Text(
-                text = "A9000",
-                modifier = GlanceModifier.padding(start = 8.dp, end = 16.dp,top = 8.dp, bottom = 8.dp),
-                style = TextStyle(
-                    fontWeight = FontWeight.Normal,
-                    fontSize = 18.sp,
-                    color = ColorProvider(day = White, night = White)
-                )
-            )
-
-            CircularProgressIndicator(
-                color = ColorProvider(day = Red, night = Red)
             )
         }
     }
