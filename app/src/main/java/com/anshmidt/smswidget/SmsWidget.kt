@@ -24,6 +24,7 @@ import com.anshmidt.smswidget.ui.theme.White
 object SmsWidget : GlanceAppWidget() {
 
     val isLoadingKey = booleanPreferencesKey("isLoading")
+    private val SEND_BUTTON_SIZE = 44.dp
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         provideContent {
@@ -91,18 +92,36 @@ object SmsWidget : GlanceAppWidget() {
             )
 
             if (isLoading) {
-                SendingProgressBar()
+                ProgressBar()
             } else {
-                CircleButton()
+                SendButton()
             }
         }
     }
-    
+
+
     @Composable
-    private fun SendingProgressBar() {
+    private fun SendButton() {
         Box(
             modifier = GlanceModifier
-                .size(44.dp)
+                .background(ImageProvider(R.drawable.circle_button_background))
+                .size(SEND_BUTTON_SIZE)
+                .clickable(onClick = actionRunCallback(SendButtonClickCallback::class.java)),
+            contentAlignment = Alignment.Center
+        ) {
+            Image(
+                modifier = GlanceModifier.padding(10.dp),
+                contentDescription = "Send SMS",
+                provider = ImageProvider(R.drawable.ic_send_sms)
+            )
+        }
+    }
+
+    @Composable
+    private fun ProgressBar() {
+        Box(
+            modifier = GlanceModifier
+                .size(SEND_BUTTON_SIZE)
                 .clickable(onClick = actionRunCallback(SendButtonClickCallback::class.java)),
             contentAlignment = Alignment.Center
         ) {
@@ -112,122 +131,5 @@ object SmsWidget : GlanceAppWidget() {
         }
     }
 
-    @Composable
-    private fun WidgetCircularButtonWithoutBackgroundRow() {
-        Row(
-            horizontalAlignment = Alignment.Start,
-            modifier = GlanceModifier
-                .padding(8.dp)
-        ) {
-            Text(
-                text = "9011:",
-                modifier = GlanceModifier.padding(start = 0.dp, end = 0.dp,top = 8.dp, bottom = 8.dp),
-                style = TextStyle(
-                    fontWeight = FontWeight.Normal,
-                    fontSize = 18.sp,
-                    color = ColorProvider(day = White, night = White)
-                )
-            )
 
-            Text(
-                text = "A9000",
-                modifier = GlanceModifier.padding(start = 8.dp, end = 16.dp,top = 8.dp, bottom = 8.dp),
-                style = TextStyle(
-                    fontWeight = FontWeight.Normal,
-                    fontSize = 18.sp,
-                    color = ColorProvider(day = White, night = White)
-                )
-            )
-
-            CircleButtonWithoutBackground()
-        }
-    }
-
-    @Composable
-    private fun WidgetPillButtonRow() {
-        Row(
-            horizontalAlignment = Alignment.Start,
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = GlanceModifier.padding(8.dp)
-        ) {
-            Text(
-                text = "9011",
-                modifier = GlanceModifier.padding(start = 0.dp, end = 8.dp,top = 8.dp, bottom = 8.dp),
-                style = TextStyle(
-                    fontWeight = FontWeight.Normal,
-                    fontSize = 18.sp,
-                    color = ColorProvider(day = White, night = White)
-                )
-            )
-            PillButton()
-        }
-    }
-
-    @Composable
-    private fun CircleButton() {
-        Box(
-            modifier = GlanceModifier
-                .background(ImageProvider(R.drawable.circle_button_background))
-                .size(44.dp)
-                .clickable(onClick = actionRunCallback(SendButtonClickCallback::class.java)),
-            contentAlignment = Alignment.Center
-        ) {
-            Image(
-                modifier = GlanceModifier.padding(10.dp),
-                contentDescription = "Send SMS",
-                provider = ImageProvider(R.drawable.ic_send_sms)
-            )
-        }
-    }
-
-    @Composable
-    private fun CircleButtonWithoutBackground() {
-        Box(
-            modifier = GlanceModifier
-                .wrapContentSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            Image(
-                modifier = GlanceModifier.padding(10.dp),
-                contentDescription = "Send SMS",
-                provider = ImageProvider(R.drawable.ic_send_sms)
-            )
-        }
-    }
-
-    @Composable
-    private fun PillButton() {
-        Row(
-            modifier = GlanceModifier
-                .background(ImageProvider(R.drawable.rounded_corners_background))
-                .wrapContentSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "A9000",
-                modifier = GlanceModifier.padding(
-                    start = 12.dp,
-                    end = 0.dp,
-                    top = 10.dp,
-                    bottom = 10.dp
-                ),
-                style = TextStyle(
-                    fontWeight = FontWeight.Normal,
-                    fontSize = 18.sp,
-                    color = ColorProvider(day = White, night = White)
-                )
-            )
-            Image(
-                modifier = GlanceModifier.padding(
-                    start = 8.dp,
-                    end = 10.dp,
-                    top = 10.dp,
-                    bottom = 10.dp
-                ),
-                contentDescription = "Send SMS",
-                provider = ImageProvider(R.drawable.ic_send_sms)
-            )
-        }
-    }
 }
