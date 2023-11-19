@@ -21,10 +21,7 @@ import com.anshmidt.smswidget.ui.theme.Red
 import com.anshmidt.smswidget.ui.theme.TranslucentBlack
 import com.anshmidt.smswidget.ui.theme.White
 
-object SmsWidget : GlanceAppWidget() {
-
-    val isLoadingKey = booleanPreferencesKey("isLoading")
-    private val SEND_BUTTON_SIZE = 44.dp
+class SmsWidget : GlanceAppWidget() {
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         provideContent {
@@ -129,6 +126,11 @@ object SmsWidget : GlanceAppWidget() {
                 color = ColorProvider(day = Red, night = Red)
             )
         }
+    }
+
+    companion object {
+        val isLoadingKey = booleanPreferencesKey("isLoading")
+        private val SEND_BUTTON_SIZE = 44.dp
     }
 
 

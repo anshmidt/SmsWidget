@@ -5,5 +5,5 @@ import androidx.glance.appwidget.GlanceAppWidgetReceiver
 
 class SmsWidgetReceiver : GlanceAppWidgetReceiver() {
 
-    override val glanceAppWidget: GlanceAppWidget = SmsWidget
+    override val glanceAppWidget: GlanceAppWidget = SmsWidget()
 }
