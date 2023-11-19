@@ -10,6 +10,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.dp
+import androidx.datastore.preferences.core.preferencesOf
+import androidx.glance.appwidget.ExperimentalGlanceRemoteViewsApi
 import com.anshmidt.smswidget.ui.theme.AppTheme
 
 class MainActivity : ComponentActivity() {
@@ -41,3 +45,4 @@ fun DefaultPreview() {
         Greeting("Android")
     }
 }
+
