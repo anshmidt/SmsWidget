@@ -118,8 +118,7 @@ class SmsWidget : GlanceAppWidget() {
     private fun ProgressBar() {
         Box(
             modifier = GlanceModifier
-                .size(SEND_BUTTON_SIZE)
-                .clickable(onClick = actionRunCallback(SendButtonClickCallback::class.java)),
+                .size(SEND_BUTTON_SIZE),
             contentAlignment = Alignment.Center
         ) {
             CircularProgressIndicator(
