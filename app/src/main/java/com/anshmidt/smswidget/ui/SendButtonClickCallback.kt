@@ -19,9 +19,7 @@ class SendButtonClickCallback : ActionCallback {
         glanceId: GlanceId,
         parameters: ActionParameters
     ) {
-        val expireTime = LocalDateTime.now().plusSeconds(2L).toEpochSecond(ZoneOffset.UTC)
-        val currentTime = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)
-        tickerFlow(expireTime - currentTime)
+        simpleTickerFlow(2L)
             .onCompletion {
                 updateAppWidgetState(context, glanceId) { prefs ->
                     prefs[SmsWidget.isLoadingKey] = false
@@ -36,7 +34,11 @@ class SendButtonClickCallback : ActionCallback {
         SmsWidget().update(context, glanceId)
     }
 
-    private fun tickerFlow(start: Long, end: Long = 0L) = flow {
+    private fun simpleTickerFlow(seconds: Long) = flow {
+        val expireTime = LocalDateTime.now().plusSeconds(seconds).toEpochSecond(ZoneOffset.UTC)
+        val currentTime = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)
+        val start = expireTime - currentTime
+        val end = 0L
         for (i in start downTo end) {
             emit(i)
             delay(1_000)
