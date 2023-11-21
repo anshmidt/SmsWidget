@@ -75,9 +75,8 @@ class SmsWidget : GlanceAppWidget() {
         ) {
             Text(
                 text = "9011:",
-                modifier = GlanceModifier.padding(start = 0.dp, end = 0.dp, top = 8.dp, bottom = 8.dp),
                 style = TextStyle(
-                    fontWeight = FontWeight.Normal,
+                    fontWeight = FontWeight.Bold,
                     fontSize = 18.sp,
                     color = ColorProvider(day = White, night = White)
                 )
@@ -85,7 +84,7 @@ class SmsWidget : GlanceAppWidget() {
 
             Text(
                 text = "A9000",
-                modifier = GlanceModifier.padding(start = 8.dp, end = 16.dp,top = 8.dp, bottom = 8.dp),
+                modifier = GlanceModifier.padding(start = 8.dp, end = 16.dp),
                 style = TextStyle(
                     fontWeight = FontWeight.Normal,
                     fontSize = 18.sp,
@@ -114,7 +113,7 @@ class SmsWidget : GlanceAppWidget() {
         ) {
             Text(
                 text = "Message sent!",
-                modifier = GlanceModifier.padding(start = 0.dp, end = 16.dp, top = 0.dp, bottom = 0.dp),
+                modifier = GlanceModifier.padding(start = 0.dp, end = 16.dp),
                 style = TextStyle(
                     fontWeight = FontWeight.Normal,
                     fontSize = 14.sp,
