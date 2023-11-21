@@ -1,12 +1,9 @@
 package com.anshmidt.smswidget
 
 import android.content.Context
-import android.widget.ProgressBar
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.glance.*
 import androidx.glance.action.clickable
@@ -29,10 +26,6 @@ class SmsWidget : GlanceAppWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         provideContent {
             GlanceTheme {
-//                val isLoading = currentState(key = isLoadingKey) ?: false
-//
-//                WidgetContent(isLoading)
-
                 val rowState = currentState(key = rowStateKey)?.toRowState() ?: RowState.DEFAULT_ROW_STATE
                 WidgetContent(rowState)
             }
@@ -136,7 +129,7 @@ class SmsWidget : GlanceAppWidget() {
     private fun SendButton() {
         Box(
             modifier = GlanceModifier
-                .background(ImageProvider(R.drawable.circle_button_background))
+                .background(ImageProvider(R.drawable.circular_background))
                 .size(SEND_BUTTON_SIZE)
                 .clickable(onClick = actionRunCallback(SendButtonClickCallback::class.java)),
             contentAlignment = Alignment.Center
@@ -153,7 +146,7 @@ class SmsWidget : GlanceAppWidget() {
     private fun MessageSentIcon() {
         Box(
             modifier = GlanceModifier
-                .background(ImageProvider(R.drawable.circle_button_background))
+                .background(ImageProvider(R.drawable.circular_background))
                 .size(SEND_BUTTON_SIZE),
             contentAlignment = Alignment.Center
         ) {
@@ -179,7 +172,6 @@ class SmsWidget : GlanceAppWidget() {
     }
 
     companion object {
-        val isLoadingKey = booleanPreferencesKey("isLoading")
         val rowStateKey = intPreferencesKey("rowState")
         private val SEND_BUTTON_SIZE = 44.dp
     }
