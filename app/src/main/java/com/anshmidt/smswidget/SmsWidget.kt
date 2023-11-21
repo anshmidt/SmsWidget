@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.glance.*
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.CircularProgressIndicator
@@ -28,15 +29,18 @@ class SmsWidget : GlanceAppWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         provideContent {
             GlanceTheme {
-                val isLoading = currentState(key = isLoadingKey) ?: false
+//                val isLoading = currentState(key = isLoadingKey) ?: false
+//
+//                WidgetContent(isLoading)
 
-                WidgetContent(isLoading)
+                val rowState = currentState(key = rowStateKey)?.toRowState() ?: RowState.DEFAULT_ROW_STATE
+                WidgetContent(rowState)
             }
         }
     }
 
     @Composable
-    private fun WidgetContent(isLoading: Boolean) {
+    private fun WidgetContent(rowState: RowState) {
         Column(
             modifier = GlanceModifier
                 .wrapContentHeight()
@@ -46,8 +50,11 @@ class SmsWidget : GlanceAppWidget() {
             horizontalAlignment = Alignment.Horizontal.Start
         ) {
             Title()
-            WidgetRow(isLoading = isLoading)
-            MessageSentRow()
+            if (rowState == RowState.MESSAGE_SENT) {
+                MessageSentRow()
+            } else {
+                WidgetRow(rowState = rowState)
+            }
         }
     }
 
@@ -65,7 +72,7 @@ class SmsWidget : GlanceAppWidget() {
     }
 
     @Composable
-    private fun WidgetRow(isLoading: Boolean) {
+    private fun WidgetRow(rowState: RowState) {
         Row(
             horizontalAlignment = Alignment.Start,
             verticalAlignment = Alignment.CenterVertically,
@@ -94,7 +101,7 @@ class SmsWidget : GlanceAppWidget() {
 
             Spacer(modifier = GlanceModifier.defaultWeight())
 
-            if (isLoading) {
+            if (rowState == RowState.LOADING) {
                 ProgressBar()
             } else {
                 SendButton()
@@ -173,6 +180,7 @@ class SmsWidget : GlanceAppWidget() {
 
     companion object {
         val isLoadingKey = booleanPreferencesKey("isLoading")
+        val rowStateKey = intPreferencesKey("rowState")
         private val SEND_BUTTON_SIZE = 44.dp
     }
 

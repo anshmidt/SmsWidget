@@ -5,6 +5,7 @@ import androidx.glance.GlanceId
 import androidx.glance.action.ActionParameters
 import androidx.glance.appwidget.action.ActionCallback
 import androidx.glance.appwidget.state.updateAppWidgetState
+import com.anshmidt.smswidget.RowState
 import com.anshmidt.smswidget.SmsWidget
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -19,19 +20,22 @@ class SendButtonClickCallback : ActionCallback {
         glanceId: GlanceId,
         parameters: ActionParameters
     ) {
+        updateAppWidgetState(context, glanceId) { prefs ->
+            prefs[SmsWidget.rowStateKey] = RowState.LOADING.value
+        }
+        SmsWidget().update(context, glanceId)
+
+
         simpleTickerFlow(2L)
             .onCompletion {
                 updateAppWidgetState(context, glanceId) { prefs ->
-                    prefs[SmsWidget.isLoadingKey] = false
+                    prefs[SmsWidget.rowStateKey] = RowState.MESSAGE_SENT.value
                 }
                 SmsWidget().update(context, glanceId)
             }
             .launchIn(coroutineScope)
 
-        updateAppWidgetState(context, glanceId) { prefs ->
-            prefs[SmsWidget.isLoadingKey] = true
-        }
-        SmsWidget().update(context, glanceId)
+
     }
 
     private fun simpleTickerFlow(seconds: Long) = flow {
@@ -41,7 +45,7 @@ class SendButtonClickCallback : ActionCallback {
         val end = 0L
         for (i in start downTo end) {
             emit(i)
-            delay(1_000)
+            delay(1000)
         }
     }
 }
