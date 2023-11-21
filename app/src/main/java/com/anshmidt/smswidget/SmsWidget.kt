@@ -1,6 +1,8 @@
 package com.anshmidt.smswidget
 
 import android.content.Context
+import android.widget.ProgressBar
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -45,6 +47,7 @@ class SmsWidget : GlanceAppWidget() {
         ) {
             Title()
             WidgetRow(isLoading = isLoading)
+            MessageSentRow()
         }
     }
 
@@ -65,12 +68,14 @@ class SmsWidget : GlanceAppWidget() {
     private fun WidgetRow(isLoading: Boolean) {
         Row(
             horizontalAlignment = Alignment.Start,
+            verticalAlignment = Alignment.CenterVertically,
             modifier = GlanceModifier
                 .padding(8.dp)
+                .fillMaxWidth()
         ) {
             Text(
                 text = "9011:",
-                modifier = GlanceModifier.padding(start = 0.dp, end = 0.dp,top = 8.dp, bottom = 8.dp),
+                modifier = GlanceModifier.padding(start = 0.dp, end = 0.dp, top = 8.dp, bottom = 8.dp),
                 style = TextStyle(
                     fontWeight = FontWeight.Normal,
                     fontSize = 18.sp,
@@ -88,6 +93,8 @@ class SmsWidget : GlanceAppWidget() {
                 )
             )
 
+            Spacer(modifier = GlanceModifier.defaultWeight())
+
             if (isLoading) {
                 ProgressBar()
             } else {
@@ -96,6 +103,28 @@ class SmsWidget : GlanceAppWidget() {
         }
     }
 
+    @Composable
+    private fun MessageSentRow() {
+        Row(
+            horizontalAlignment = Alignment.Start,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = GlanceModifier
+                .padding(8.dp)
+                .fillMaxWidth()
+        ) {
+            Text(
+                text = "Message sent!",
+                modifier = GlanceModifier.padding(start = 0.dp, end = 16.dp, top = 0.dp, bottom = 0.dp),
+                style = TextStyle(
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 14.sp,
+                    color = ColorProvider(day = White, night = White)
+                )
+            )
+            Spacer(modifier = GlanceModifier.defaultWeight())
+            MessageSentIcon()
+        }
+    }
 
     @Composable
     private fun SendButton() {
@@ -110,6 +139,22 @@ class SmsWidget : GlanceAppWidget() {
                 modifier = GlanceModifier.padding(10.dp),
                 contentDescription = "Send SMS",
                 provider = ImageProvider(R.drawable.ic_send_sms)
+            )
+        }
+    }
+
+    @Composable
+    private fun MessageSentIcon() {
+        Box(
+            modifier = GlanceModifier
+                .background(ImageProvider(R.drawable.circle_button_background))
+                .size(SEND_BUTTON_SIZE),
+            contentAlignment = Alignment.Center
+        ) {
+            Image(
+                modifier = GlanceModifier.padding(10.dp),
+                contentDescription = "Message sent!",
+                provider = ImageProvider(R.drawable.ic_check)
             )
         }
     }
