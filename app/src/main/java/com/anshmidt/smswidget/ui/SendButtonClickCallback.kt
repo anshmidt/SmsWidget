@@ -36,6 +36,14 @@ class SendButtonClickCallback : ActionCallback {
             .launchIn(coroutineScope)
 
 
+        simpleTickerFlow(8L)
+            .onCompletion {
+                updateAppWidgetState(context, glanceId) { prefs ->
+                    prefs[SmsWidget.rowStateKey] = RowState.NORMAL.value
+                }
+                SmsWidget().update(context, glanceId)
+            }
+            .launchIn(coroutineScope)
     }
 
     private fun simpleTickerFlow(seconds: Long) = flow {
