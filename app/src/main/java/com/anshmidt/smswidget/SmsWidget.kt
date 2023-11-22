@@ -17,6 +17,7 @@ import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import com.anshmidt.smswidget.ui.SendButtonClickCallback
+import com.anshmidt.smswidget.ui.UnlockButtonClickCallback
 import com.anshmidt.smswidget.ui.theme.Red
 import com.anshmidt.smswidget.ui.theme.TranslucentBlack
 import com.anshmidt.smswidget.ui.theme.White
@@ -94,10 +95,11 @@ class SmsWidget : GlanceAppWidget() {
 
             Spacer(modifier = GlanceModifier.defaultWeight())
 
-            if (rowState == RowState.LOADING) {
-                ProgressBar()
-            } else {
-                SendButton()
+            when (rowState) {
+                RowState.LOADING -> ProgressBar()
+                RowState.NORMAL -> SendButton()
+                RowState.LOCKED -> UnlockButton()
+                else -> UnlockButton() //shouldn't happen
             }
         }
     }
@@ -138,6 +140,23 @@ class SmsWidget : GlanceAppWidget() {
                 modifier = GlanceModifier.padding(10.dp),
                 contentDescription = "Send SMS",
                 provider = ImageProvider(R.drawable.ic_send_sms)
+            )
+        }
+    }
+
+    @Composable
+    private fun UnlockButton() {
+        Box(
+            modifier = GlanceModifier
+                .background(ImageProvider(R.drawable.circular_background))
+                .size(SEND_BUTTON_SIZE)
+                .clickable(onClick = actionRunCallback(UnlockButtonClickCallback::class.java)),
+            contentAlignment = Alignment.Center
+        ) {
+            Image(
+                modifier = GlanceModifier.padding(10.dp),
+                contentDescription = "Unlock",
+                provider = ImageProvider(R.drawable.ic_lock)
             )
         }
     }

@@ -7,12 +7,18 @@ import androidx.glance.appwidget.action.ActionCallback
 import androidx.glance.appwidget.state.updateAppWidgetState
 import com.anshmidt.smswidget.RowState
 import com.anshmidt.smswidget.SmsWidget
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onCompletion
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 
-class SendButtonClickCallback : ActionCallback {
+class UnlockButtonClickCallback : ActionCallback {
+
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
     override suspend fun onAction(
@@ -29,17 +35,21 @@ class SendButtonClickCallback : ActionCallback {
         simpleTickerFlow(2L)
             .onCompletion {
                 updateAppWidgetState(context, glanceId) { prefs ->
-                    prefs[SmsWidget.rowStateKey] = RowState.MESSAGE_SENT.value
+                    prefs[SmsWidget.rowStateKey] = RowState.NORMAL.value
                 }
                 SmsWidget().update(context, glanceId)
             }
             .launchIn(coroutineScope)
 
-
-        simpleTickerFlow(8L)
+        // Locking automatically after certain period of time if no actions were performed
+        simpleTickerFlow(9L)
             .onCompletion {
                 updateAppWidgetState(context, glanceId) { prefs ->
-                    prefs[SmsWidget.rowStateKey] = RowState.LOCKED.value
+                    val currentRowState = prefs[SmsWidget.rowStateKey]
+                    if (currentRowState == RowState.NORMAL.value) {
+                        prefs[SmsWidget.rowStateKey] = RowState.LOCKED.value
+                    }
+
                 }
                 SmsWidget().update(context, glanceId)
             }
@@ -56,4 +66,5 @@ class SendButtonClickCallback : ActionCallback {
             delay(1000)
         }
     }
+
 }

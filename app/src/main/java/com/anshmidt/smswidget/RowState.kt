@@ -1,12 +1,13 @@
 package com.anshmidt.smswidget
 
 enum class RowState(val value: Int) {
-    NORMAL(1),
-    LOADING(2),
-    MESSAGE_SENT(3);
+    NORMAL(0),
+    LOADING(1),
+    MESSAGE_SENT(2),
+    LOCKED(3);
 
     companion object {
-        val DEFAULT_ROW_STATE = NORMAL
+        val DEFAULT_ROW_STATE = LOCKED
     }
 }
 
