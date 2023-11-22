@@ -38,7 +38,7 @@ class SmsWidget : GlanceAppWidget() {
         Column(
             modifier = GlanceModifier
                 .wrapContentSize()
-                .background(ColorProvider(day = TranslucentBlack, night = TranslucentBlack)),
+                .background(ImageProvider(R.drawable.rounded_corners_background)),
             verticalAlignment = Alignment.Vertical.CenterVertically,
             horizontalAlignment = Alignment.Horizontal.Start
         ) {
