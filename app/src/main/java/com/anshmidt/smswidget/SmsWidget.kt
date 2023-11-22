@@ -37,8 +37,7 @@ class SmsWidget : GlanceAppWidget() {
     private fun WidgetContent(rowState: RowState) {
         Column(
             modifier = GlanceModifier
-                .wrapContentHeight()
-                .wrapContentWidth()
+                .wrapContentSize()
                 .background(ColorProvider(day = TranslucentBlack, night = TranslucentBlack)),
             verticalAlignment = Alignment.Vertical.CenterVertically,
             horizontalAlignment = Alignment.Horizontal.Start
@@ -49,9 +48,6 @@ class SmsWidget : GlanceAppWidget() {
             } else {
                 WidgetRow(rowState = rowState)
             }
-
-            //temp
-            WidgetRow(rowState = RowState.LOCKED)
         }
     }
 
@@ -121,7 +117,7 @@ class SmsWidget : GlanceAppWidget() {
                 modifier = GlanceModifier.padding(start = 0.dp, end = 16.dp),
                 style = TextStyle(
                     fontWeight = FontWeight.Normal,
-                    fontSize = 14.sp,
+                    fontSize = 16.sp,
                     color = ColorProvider(day = White, night = White)
                 )
             )
