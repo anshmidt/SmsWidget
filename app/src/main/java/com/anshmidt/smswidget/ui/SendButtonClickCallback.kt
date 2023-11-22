@@ -26,7 +26,7 @@ class SendButtonClickCallback : ActionCallback {
         SmsWidget().update(context, glanceId)
 
 
-        simpleTickerFlow(2L)
+        CountDownTimer.tickerFlow(2L)
             .onCompletion {
                 updateAppWidgetState(context, glanceId) { prefs ->
                     prefs[SmsWidget.rowStateKey] = RowState.MESSAGE_SENT.value
@@ -36,7 +36,7 @@ class SendButtonClickCallback : ActionCallback {
             .launchIn(coroutineScope)
 
 
-        simpleTickerFlow(8L)
+        CountDownTimer.tickerFlow(8L)
             .onCompletion {
                 updateAppWidgetState(context, glanceId) { prefs ->
                     prefs[SmsWidget.rowStateKey] = RowState.LOCKED.value
@@ -46,14 +46,5 @@ class SendButtonClickCallback : ActionCallback {
             .launchIn(coroutineScope)
     }
 
-    private fun simpleTickerFlow(seconds: Long) = flow {
-        val expireTime = LocalDateTime.now().plusSeconds(seconds).toEpochSecond(ZoneOffset.UTC)
-        val currentTime = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)
-        val start = expireTime - currentTime
-        val end = 0L
-        for (i in start downTo end) {
-            emit(i)
-            delay(1000)
-        }
-    }
+
 }

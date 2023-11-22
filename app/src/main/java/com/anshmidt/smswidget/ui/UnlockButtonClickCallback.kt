@@ -1,6 +1,7 @@
 package com.anshmidt.smswidget.ui
 
 import android.content.Context
+import android.util.Log
 import androidx.glance.GlanceId
 import androidx.glance.action.ActionParameters
 import androidx.glance.appwidget.action.ActionCallback
@@ -32,7 +33,7 @@ class UnlockButtonClickCallback : ActionCallback {
         SmsWidget().update(context, glanceId)
 
 
-        simpleTickerFlow(2L)
+        CountDownTimer.tickerFlow(1L)
             .onCompletion {
                 updateAppWidgetState(context, glanceId) { prefs ->
                     prefs[SmsWidget.rowStateKey] = RowState.NORMAL.value
@@ -42,7 +43,7 @@ class UnlockButtonClickCallback : ActionCallback {
             .launchIn(coroutineScope)
 
         // Locking automatically after certain period of time if no actions were performed
-        simpleTickerFlow(9L)
+        CountDownTimer.tickerFlow(9L)
             .onCompletion {
                 updateAppWidgetState(context, glanceId) { prefs ->
                     val currentRowState = prefs[SmsWidget.rowStateKey]
@@ -54,17 +55,6 @@ class UnlockButtonClickCallback : ActionCallback {
                 SmsWidget().update(context, glanceId)
             }
             .launchIn(coroutineScope)
-    }
-
-    private fun simpleTickerFlow(seconds: Long) = flow {
-        val expireTime = LocalDateTime.now().plusSeconds(seconds).toEpochSecond(ZoneOffset.UTC)
-        val currentTime = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)
-        val start = expireTime - currentTime
-        val end = 0L
-        for (i in start downTo end) {
-            emit(i)
-            delay(1000)
-        }
     }
 
 }

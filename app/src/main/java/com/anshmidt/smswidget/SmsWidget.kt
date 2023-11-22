@@ -49,6 +49,9 @@ class SmsWidget : GlanceAppWidget() {
             } else {
                 WidgetRow(rowState = rowState)
             }
+
+            //temp
+            WidgetRow(rowState = RowState.LOCKED)
         }
     }
 
