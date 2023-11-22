@@ -21,12 +21,22 @@ import androidx.datastore.preferences.core.preferencesOf
 import androidx.glance.appwidget.ExperimentalGlanceRemoteViewsApi
 import com.anshmidt.smswidget.ui.theme.AppTheme
 import android.Manifest
+import androidx.activity.result.contract.ActivityResultContracts
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 
 class MainActivity : ComponentActivity() {
 
     private val SEND_SMS_PERMISSION_REQUEST_CODE = 1
+    private val sendSmsPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+            if (isGranted) {
+                // Permission granted, now perform the action (e.g., send SMS)
+                sendSMS()
+            } else {
+                // Permission denied, handle accordingly (e.g., show a message)
+            }
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,56 +52,22 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        // Check for SMS permission before sending
-        if (checkPermission()) {
-            // Permission is already granted, send SMS
-            sendSMS()
-        } else {
-            // Request SMS permission
-            requestPermission()
-        }
+        // Check and request SEND_SMS permission when needed
+        checkAndRequestSendSmsPermission()
     }
 
-
-    private fun checkPermission(): Boolean {
-        return ContextCompat.checkSelfPermission(
-            this,
-            Manifest.permission.SEND_SMS
-        ) == PackageManager.PERMISSION_GRANTED
-    }
-
-    private fun requestPermission() {
-        ActivityCompat.requestPermissions(
-            this,
-            arrayOf(Manifest.permission.SEND_SMS),
-            SEND_SMS_PERMISSION_REQUEST_CODE
-        )
-    }
-
-    @Deprecated("Deprecated in Java")
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        when (requestCode) {
-            SEND_SMS_PERMISSION_REQUEST_CODE -> {
-                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-                    // Permission granted, send SMS
-                    sendSMS()
-                } else {
-                    // Permission denied, show a toast or handle accordingly
-                    Toast.makeText(
-                        this,
-                        "SMS permission denied. Cannot send SMS.",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-                return
+    private fun checkAndRequestSendSmsPermission() {
+        when {
+            ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.SEND_SMS
+            ) == PackageManager.PERMISSION_GRANTED -> {
+                // Permission is already granted, send SMS
+                sendSMS()
             }
             else -> {
-                // Ignore other requests for now
+                // Request the SEND_SMS permission
+                sendSmsPermissionLauncher.launch(Manifest.permission.SEND_SMS)
             }
         }
     }
