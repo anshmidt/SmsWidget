@@ -1,4 +1,4 @@
-package com.anshmidt.smswidget
+package com.anshmidt.smswidget.data
 
 enum class RowState(val value: Int) {
     NORMAL(0),

@@ -1,9 +1,13 @@
-package com.anshmidt.smswidget
+package com.anshmidt.smswidget.ui
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.glance.*
 import androidx.glance.action.clickable
@@ -16,25 +20,29 @@ import androidx.glance.layout.*
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
-import com.anshmidt.smswidget.ui.SendButtonClickCallback
-import com.anshmidt.smswidget.ui.UnlockButtonClickCallback
+import com.anshmidt.smswidget.R
+import com.anshmidt.smswidget.data.RowState
+import com.anshmidt.smswidget.data.WidgetState
+import com.anshmidt.smswidget.data.toRowState
 import com.anshmidt.smswidget.ui.theme.Red
-import com.anshmidt.smswidget.ui.theme.TranslucentBlack
 import com.anshmidt.smswidget.ui.theme.White
 
 class SmsWidget : GlanceAppWidget() {
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
+        checkAndRequestSendSmsPermission(context)
+
         provideContent {
             GlanceTheme {
                 val rowState = currentState(key = rowStateKey)?.toRowState() ?: RowState.DEFAULT_ROW_STATE
-                WidgetContent(rowState)
+                val widgetState = getWidgetState(context)
+                WidgetContent(widgetState, rowState)
             }
         }
     }
 
     @Composable
-    private fun WidgetContent(rowState: RowState) {
+    private fun WidgetContent(widgetState: WidgetState, rowState: RowState) {
         Column(
             modifier = GlanceModifier
                 .wrapContentSize()
@@ -43,12 +51,31 @@ class SmsWidget : GlanceAppWidget() {
             horizontalAlignment = Alignment.Horizontal.Start
         ) {
             Title()
+
+            if (widgetState == WidgetState.PERMISSIONS_ERROR) {
+                PermissionsError()
+                return@Column
+            }
+
             if (rowState == RowState.MESSAGE_SENT) {
                 MessageSentRow()
             } else {
                 WidgetRow(rowState = rowState)
             }
         }
+    }
+
+    @Composable
+    private fun PermissionsError() {
+        Text(
+            text = "It looks like permission to send SMS not granted. Please open the app and allow it to send SMS.",
+            modifier = GlanceModifier.padding(horizontal = 16.dp, vertical = 16.dp),
+            style = TextStyle(
+                fontWeight = FontWeight.Normal,
+                fontSize = 16.sp,
+                color = ColorProvider(day = White, night = White)
+            )
+        )
     }
 
     @Composable
@@ -188,6 +215,36 @@ class SmsWidget : GlanceAppWidget() {
             )
         }
     }
+
+    private fun checkAndRequestSendSmsPermission(context: Context) {
+        when {
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.SEND_SMS
+            ) == PackageManager.PERMISSION_GRANTED -> {
+                // Permission is already granted, send SMS
+                Log.d("SmsPermission", "SEND_SMS granted")
+            }
+            else -> {
+                Log.d("SmsPermission", "SEND_SMS not granted")
+            }
+        }
+    }
+
+    private fun isSmsPermissionGranted(context: Context): Boolean {
+        return ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.SEND_SMS
+            ) == PackageManager.PERMISSION_GRANTED
+    }
+
+    private fun getWidgetState(context: Context) =
+        if (isSmsPermissionGranted(context)) {
+            WidgetState.NORMAL
+        } else {
+            WidgetState.PERMISSIONS_ERROR
+        }
+
 
     companion object {
         val rowStateKey = intPreferencesKey("rowState")

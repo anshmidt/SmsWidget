@@ -1,6 +1,5 @@
-package com.anshmidt.smswidget.ui
+package com.anshmidt.smswidget.data
 
-import android.util.Log
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
 import java.time.LocalDateTime

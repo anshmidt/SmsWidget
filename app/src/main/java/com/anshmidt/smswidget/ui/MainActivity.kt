@@ -1,4 +1,4 @@
-package com.anshmidt.smswidget
+package com.anshmidt.smswidget.ui
 
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -13,28 +13,29 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.DpSize
-import androidx.compose.ui.unit.dp
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.datastore.preferences.core.preferencesOf
-import androidx.glance.appwidget.ExperimentalGlanceRemoteViewsApi
 import com.anshmidt.smswidget.ui.theme.AppTheme
 import android.Manifest
+import android.Manifest.permission_group.SMS
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
+import androidx.compose.foundation.layout.Column
+import androidx.compose.material3.Button
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.rememberUpdatedState
+import com.anshmidt.smswidget.MainViewModel
 import java.time.LocalDateTime
-import java.time.ZoneOffset
 
 class MainActivity : ComponentActivity() {
 
-    private val SEND_SMS_PERMISSION_REQUEST_CODE = 1
+    private val viewModel: MainViewModel by viewModels()
     private val sendSmsPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
             if (isGranted) {
-                // Permission granted, now perform the action (e.g., send SMS)
-                sendSMS()
+                viewModel.setPermissionGranted(true)
             } else {
-                // Permission denied, handle accordingly (e.g., show a message)
+                viewModel.setPermissionDenied(true)
             }
         }
 
@@ -42,34 +43,55 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             AppTheme {
-                // A surface container using the 'background' color from the theme
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    Greeting("Android")
-                }
+                Content()
             }
         }
-
-        // Check and request SEND_SMS permission when needed
-        checkAndRequestSendSmsPermission()
     }
 
-    private fun checkAndRequestSendSmsPermission() {
-        when {
-            ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.SEND_SMS
-            ) == PackageManager.PERMISSION_GRANTED -> {
-                // Permission is already granted, send SMS
-                sendSMS()
+    @Composable
+    private fun Content() {
+        val isPermissionGranted by viewModel.permissionGranted.observeAsState(initial = isSmsPermissionGranted())
+        val isPermissionDenied by viewModel.permissionDenied.observeAsState(initial = false)
+
+        // A surface container using the 'background' color from the theme
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            Column {
+                Text("SmsWidget")
+
+                if (isPermissionGranted) {
+                    Text("SMS permission granted")
+                } else {
+                    Text("SMS permission not granted.")
+                }
+
+                if (isPermissionDenied) {
+                    Text("Sms permission denied")
+                } else {
+                    Text("Sms permission not denied")
+                }
+
+                Button(onClick = {
+                    requestSmsPermission()
+                }) {
+                    Text("Grant SMS permission")
+                }
+
             }
-            else -> {
-                // Request the SEND_SMS permission
-                sendSmsPermissionLauncher.launch(Manifest.permission.SEND_SMS)
-            }
+
         }
+    }
+
+    private fun isSmsPermissionGranted() =
+        ContextCompat.checkSelfPermission(
+            this,
+            Manifest.permission.SEND_SMS
+        ) == PackageManager.PERMISSION_GRANTED
+
+    private fun requestSmsPermission() {
+        sendSmsPermissionLauncher.launch(Manifest.permission.SEND_SMS)
     }
 
     private fun sendSMS() {
