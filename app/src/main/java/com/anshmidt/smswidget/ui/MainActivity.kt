@@ -24,6 +24,7 @@ import androidx.compose.material3.Button
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.glance.appwidget.GlanceAppWidgetManager
 import com.anshmidt.smswidget.MainViewModel
 import java.time.LocalDateTime
 
@@ -48,40 +49,32 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        // Checking permission in case user granted it from Settings app
+        if (isSmsPermissionGranted()) {
+            viewModel.setPermissionGranted(true)
+            viewModel.setPermissionDenied(false)
+        }
+    }
+
     @Composable
     private fun Content() {
         val isPermissionGranted by viewModel.permissionGranted.observeAsState(initial = isSmsPermissionGranted())
         val isPermissionDenied by viewModel.permissionDenied.observeAsState(initial = false)
 
-        // A surface container using the 'background' color from the theme
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.background
-        ) {
-            Column {
-                Text("SmsWidget")
-
-                if (isPermissionGranted) {
-                    Text("SMS permission granted")
-                } else {
-                    Text("SMS permission not granted.")
-                }
-
-                if (isPermissionDenied) {
-                    Text("Sms permission denied")
-                } else {
-                    Text("Sms permission not denied")
-                }
-
-                Button(onClick = {
-                    requestSmsPermission()
-                }) {
-                    Text("Grant SMS permission")
-                }
-
-            }
-
+        if (isPermissionDenied) {
+            SmsPermissionDeniedScreen()
+            return
         }
+
+        if (isPermissionGranted) {
+            NormalScreen()
+        } else {
+            AskSmsPermissionScreen()
+        }
+
+
     }
 
     private fun isSmsPermissionGranted() =
@@ -90,9 +83,7 @@ class MainActivity : ComponentActivity() {
             Manifest.permission.SEND_SMS
         ) == PackageManager.PERMISSION_GRANTED
 
-    private fun requestSmsPermission() {
-        sendSmsPermissionLauncher.launch(Manifest.permission.SEND_SMS)
-    }
+
 
     private fun sendSMS() {
         val phoneNumber = "1234567890" // Replace with the recipient's phone number
@@ -109,6 +100,62 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    private suspend fun updateWidget() {
+        val glanceId = GlanceAppWidgetManager(this).getGlanceIds(SmsWidget::class.java).firstOrNull()
+        glanceId?.let { SmsWidget().update(this, it) }
+    }
+
+    @Composable
+    private fun AskSmsPermissionScreen() {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            Column {
+                Text("SmsWidget")
+
+                Text("SmsWidget transforms experience of sending standard SMS messages to just one click! In order to use it, please grant permission to send SMS")
+
+                Button(onClick = {
+                    requestSmsPermission()
+                }) {
+                    Text("Grant SMS permission")
+                }
+            }
+        }
+    }
+
+    @Composable
+    private fun SmsPermissionDeniedScreen() {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            Column {
+                Text("SmsWidget")
+                Text("Oops! Looks like permission to send SMS is not granted. Please open the Settings app and grant SmsWidget permission to send SMS")
+            }
+        }
+    }
+
+
+    @Composable
+    private fun NormalScreen() {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            Column {
+                Text("SmsWidget")
+            }
+        }
+    }
+
+    private fun requestSmsPermission() {
+        sendSmsPermissionLauncher.launch(Manifest.permission.SEND_SMS)
+    }
+
+
 }
 
 @Composable
@@ -123,4 +170,5 @@ fun DefaultPreview() {
         Greeting("Android")
     }
 }
+
 
