@@ -56,10 +56,9 @@ class SmsWidget : GlanceAppWidget() {
                 return@Column
             }
 
-            if (rowState == RowState.MESSAGE_SENT) {
-                MessageSentRow()
-            } else {
-                WidgetRow(rowState = rowState)
+            when (rowState) {
+                RowState.MESSAGE_SENT, RowState.MESSAGE_SENDING_FAILED -> MessageStatusRow(rowState)
+                else -> WidgetRow(rowState = rowState)
             }
         }
     }
@@ -141,7 +140,7 @@ class SmsWidget : GlanceAppWidget() {
 
 
     @Composable
-    private fun MessageSentRow() {
+    private fun MessageStatusRow(rowState: RowState) {
         Row(
             horizontalAlignment = Alignment.Start,
             verticalAlignment = Alignment.CenterVertically,
@@ -150,7 +149,10 @@ class SmsWidget : GlanceAppWidget() {
                 .fillMaxWidth()
         ) {
             Text(
-                text = "Message sent!",
+                text = if (rowState == RowState.MESSAGE_SENT)
+                    "Message sent!"
+                else
+                    "Message sending failed",
                 modifier = GlanceModifier.padding(start = 0.dp, end = 16.dp),
                 style = TextStyle(
                     fontWeight = FontWeight.Normal,

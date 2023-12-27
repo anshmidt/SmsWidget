@@ -4,7 +4,8 @@ enum class RowState(val value: Int) {
     NORMAL(0),
     LOADING(1),
     MESSAGE_SENT(2),
-    LOCKED(3);
+    LOCKED(3),
+    MESSAGE_SENDING_FAILED(4);
 
     companion object {
         val DEFAULT_ROW_STATE = LOCKED
