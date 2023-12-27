@@ -1,42 +1,45 @@
 package com.anshmidt.smswidget.ui
 
+import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.telephony.SmsManager
-import android.widget.Toast
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.content.ContextCompat
-import com.anshmidt.smswidget.ui.theme.AppTheme
-import android.Manifest
-import android.Manifest.permission_group.SMS
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.viewModels
-import androidx.compose.foundation.layout.Column
-import androidx.compose.material3.Button
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.rememberUpdatedState
-import androidx.glance.appwidget.GlanceAppWidgetManager
+import androidx.glance.appwidget.updateAll
+import androidx.lifecycle.lifecycleScope
 import com.anshmidt.smswidget.MainViewModel
-import java.time.LocalDateTime
+import com.anshmidt.smswidget.ui.theme.AppTheme
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
     private val viewModel: MainViewModel by viewModels()
     private val sendSmsPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+            Log.d("MainActivity", "permission granted: $isGranted")
             if (isGranted) {
                 viewModel.setPermissionGranted(true)
             } else {
                 viewModel.setPermissionDenied(true)
+            }
+            lifecycleScope.launch(Dispatchers.Main) {
+                updateWidget()
             }
         }
 
@@ -73,8 +76,6 @@ class MainActivity : ComponentActivity() {
         } else {
             AskSmsPermissionScreen()
         }
-
-
     }
 
     private fun isSmsPermissionGranted() =
@@ -84,25 +85,8 @@ class MainActivity : ComponentActivity() {
         ) == PackageManager.PERMISSION_GRANTED
 
 
-
-    private fun sendSMS() {
-        val phoneNumber = "1234567890" // Replace with the recipient's phone number
-        val message = "Hello, this is a test message: ${
-            LocalDateTime.now()}"
-
-        try {
-            val smsManager = SmsManager.getDefault()
-            smsManager.sendTextMessage(phoneNumber, null, message, null, null)
-            Toast.makeText(this, "SMS sent successfully", Toast.LENGTH_SHORT).show()
-        } catch (e: Exception) {
-            Toast.makeText(this, "Failed to send SMS", Toast.LENGTH_SHORT).show()
-            e.printStackTrace()
-        }
-    }
-
     private suspend fun updateWidget() {
-        val glanceId = GlanceAppWidgetManager(this).getGlanceIds(SmsWidget::class.java).firstOrNull()
-        glanceId?.let { SmsWidget().update(this, it) }
+        SmsWidget().updateAll(this)
     }
 
     @Composable

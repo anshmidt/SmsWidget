@@ -30,10 +30,9 @@ import com.anshmidt.smswidget.ui.theme.White
 class SmsWidget : GlanceAppWidget() {
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
-        checkAndRequestSendSmsPermission(context)
-
         provideContent {
             GlanceTheme {
+                Log.d("SmsWidget", "updating UI")
                 val rowState = currentState(key = rowStateKey)?.toRowState() ?: RowState.DEFAULT_ROW_STATE
                 val widgetState = getWidgetState(context)
                 WidgetContent(widgetState, rowState)
@@ -101,23 +100,33 @@ class SmsWidget : GlanceAppWidget() {
                 .fillMaxWidth()
         ) {
             Text(
-                text = "9011:",
+                text = "90 minutes",
+                modifier = GlanceModifier.padding(start = 0.dp, end = 16.dp),
                 style = TextStyle(
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 14.sp,
                     color = ColorProvider(day = White, night = White)
                 )
             )
 
-            Text(
-                text = "A9000",
-                modifier = GlanceModifier.padding(start = 8.dp, end = 16.dp),
-                style = TextStyle(
-                    fontWeight = FontWeight.Normal,
-                    fontSize = 18.sp,
-                    color = ColorProvider(day = White, night = White)
-                )
-            )
+//            Text(
+//                text = "9011:",
+//                style = TextStyle(
+//                    fontWeight = FontWeight.Bold,
+//                    fontSize = 18.sp,
+//                    color = ColorProvider(day = White, night = White)
+//                )
+//            )
+//
+//            Text(
+//                text = "A9000",
+//                modifier = GlanceModifier.padding(start = 8.dp, end = 16.dp),
+//                style = TextStyle(
+//                    fontWeight = FontWeight.Normal,
+//                    fontSize = 18.sp,
+//                    color = ColorProvider(day = White, night = White)
+//                )
+//            )
 
             Spacer(modifier = GlanceModifier.defaultWeight())
 
@@ -129,6 +138,7 @@ class SmsWidget : GlanceAppWidget() {
             }
         }
     }
+
 
     @Composable
     private fun MessageSentRow() {
@@ -216,20 +226,7 @@ class SmsWidget : GlanceAppWidget() {
         }
     }
 
-    private fun checkAndRequestSendSmsPermission(context: Context) {
-        when {
-            ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.SEND_SMS
-            ) == PackageManager.PERMISSION_GRANTED -> {
-                // Permission is already granted, send SMS
-                Log.d("SmsPermission", "SEND_SMS granted")
-            }
-            else -> {
-                Log.d("SmsPermission", "SEND_SMS not granted")
-            }
-        }
-    }
+
 
     private fun isSmsPermissionGranted(context: Context): Boolean {
         return ContextCompat.checkSelfPermission(
@@ -240,8 +237,10 @@ class SmsWidget : GlanceAppWidget() {
 
     private fun getWidgetState(context: Context) =
         if (isSmsPermissionGranted(context)) {
+            Log.d("SmsWidget", "permission granted")
             WidgetState.NORMAL
         } else {
+            Log.d("SmsWidget", "permission not granted")
             WidgetState.PERMISSIONS_ERROR
         }
 
