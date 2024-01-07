@@ -8,21 +8,23 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.core.content.ContextCompat
 import androidx.glance.appwidget.updateAll
 import androidx.lifecycle.lifecycleScope
 import com.anshmidt.smswidget.MainViewModel
+import com.anshmidt.smswidget.datasources.database.MessageEntity
 import com.anshmidt.smswidget.ui.theme.AppTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -109,6 +111,10 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    private fun requestSmsPermission() {
+        sendSmsPermissionLauncher.launch(Manifest.permission.SEND_SMS)
+    }
+
     @Composable
     private fun SmsPermissionDeniedScreen() {
         Surface(
@@ -125,34 +131,120 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     private fun NormalScreen() {
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.background
+        var showAddDialog by remember { mutableStateOf(false) }
+
+        Scaffold(
+            floatingActionButton = {
+                AddButton(onAddButtonClicked = { showAddDialog = true })
+            }
         ) {
-            Column {
-                Text("SmsWidget")
+            Surface(
+                modifier = Modifier.fillMaxSize(),
+                color = MaterialTheme.colorScheme.background
+            ) {
+                Row {
+                    Text("SmsWidget")
+                    MessageList()
+                }
+            }
+        }
+
+        if (showAddDialog) {
+            Dialog(
+                onDismissRequest = { showAddDialog = false }
+            ) {
+                AddDialogContent(
+                    onCancelButtonClicked = { showAddDialog = false },
+                    onSaveButtonClicked = { showAddDialog = false }
+                )
             }
         }
     }
 
-    private fun requestSmsPermission() {
-        sendSmsPermissionLauncher.launch(Manifest.permission.SEND_SMS)
+    @Composable
+    private fun AddDialogContent(
+        onCancelButtonClicked: () -> Unit,
+        onSaveButtonClicked: () -> Unit
+    ) {
+        Column {
+            TextField(value = "9011", onValueChange = {})
+            TextField(value = "A90", onValueChange = {})
+            TextField(value = "9011: A90", onValueChange = {})
+            Button(
+                onClick = onCancelButtonClicked,
+            ) {
+                Text("Cancel")
+            }
+            Button(
+                onClick = onSaveButtonClicked
+            ) {
+                Text("Save")
+            }
+        }
+    }
+
+    @Composable
+    private fun MessageList() {
+
+    }
+
+    @Composable
+    private fun Message(
+        messageEntity: MessageEntity,
+        onEditButtonClicked: (MessageEntity) -> Unit,
+        onDeleteButtonClicked: (MessageEntity) -> Unit
+    ) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+        ) {
+            Column {
+                Text("Phone number: ${messageEntity.phoneNumber}")
+                Text("Message text: ${messageEntity.messageText}")
+                Text("Caption: ${messageEntity.caption}")
+
+                Row {
+                    IconButton(onClick = { onEditButtonClicked(messageEntity) }) {
+                        Icon(
+                            imageVector = Icons.Filled.Edit,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                    IconButton(onClick = { onDeleteButtonClicked(messageEntity) }) {
+                        Icon(
+                            imageVector = Icons.Filled.Delete,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    @Composable
+    private fun AddButton(onAddButtonClicked: () -> Unit) {
+        FloatingActionButton(
+            onClick = {
+                onAddButtonClicked()
+            },
+            shape = MaterialTheme.shapes.small.copy(CornerSize(percent = 50)),
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Add,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onPrimary,
+            )
+        }
     }
 
 
+
+
 }
 
-@Composable
-fun Greeting(name: String) {
-    Text(text = "Hello $name!")
-}
 
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
-    AppTheme {
-        Greeting("Android")
-    }
-}
 
 
