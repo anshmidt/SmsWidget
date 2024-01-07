@@ -8,6 +8,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.icons.Icons
@@ -20,12 +21,14 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.ContextCompat
 import androidx.glance.appwidget.updateAll
 import androidx.lifecycle.lifecycleScope
 import com.anshmidt.smswidget.MainViewModel
 import com.anshmidt.smswidget.datasources.database.MessageEntity
 import com.anshmidt.smswidget.ui.theme.AppTheme
+import com.anshmidt.smswidget.ui.theme.Black600
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -151,7 +154,8 @@ class MainActivity : ComponentActivity() {
 
         if (showAddDialog) {
             Dialog(
-                onDismissRequest = { showAddDialog = false }
+                onDismissRequest = { showAddDialog = false },
+                properties = DialogProperties(usePlatformDefaultWidth = false)
             ) {
                 AddDialogContent(
                     onCancelButtonClicked = { showAddDialog = false },
@@ -166,8 +170,24 @@ class MainActivity : ComponentActivity() {
         onCancelButtonClicked: () -> Unit,
         onSaveButtonClicked: () -> Unit
     ) {
-        Column {
-            TextField(value = "9011", onValueChange = {})
+        Column(
+            modifier = Modifier
+                .background(Black600)
+                .padding(24.dp)
+                .fillMaxSize()
+        ) {
+            TextField(
+                value = "9011",
+                onValueChange = {},
+                label = { Text("Phone number") },
+                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                colors = TextFieldDefaults.colors(
+                    focusedTextColor = MaterialTheme.colorScheme.onBackground,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
+                    focusedContainerColor = MaterialTheme.colorScheme.background,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.background
+                )
+            )
             TextField(value = "A90", onValueChange = {})
             TextField(value = "9011: A90", onValueChange = {})
             Button(
@@ -230,6 +250,7 @@ class MainActivity : ComponentActivity() {
             onClick = {
                 onAddButtonClicked()
             },
+            containerColor = MaterialTheme.colorScheme.primary,
             shape = MaterialTheme.shapes.small.copy(CornerSize(percent = 50)),
         ) {
             Icon(

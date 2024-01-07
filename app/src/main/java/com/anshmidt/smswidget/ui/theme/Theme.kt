@@ -14,17 +14,17 @@ import androidx.core.view.ViewCompat
 private val DarkColorScheme = darkColorScheme(
     primary = Red,
     onPrimary = White,
-    background = TranslucentBlack,
+    background = Black700,
     onBackground = White,
-    surface = TranslucentBlack
+    surface = Black700
 )
 
 private val LightColorScheme = lightColorScheme(
     primary = Red,
     onPrimary = White,
-    background = TranslucentBlack,
+    background = Black700,
     onBackground = White,
-    surface = TranslucentBlack
+    surface = Black700
 
     /* Other default colors to override
     background = Color(0xFFFFFBFE),
