@@ -16,6 +16,6 @@ val appModule = module {
         ).build()
     }
 
-    single { MessageRepository() }
+    single { MessageRepository(get()) }
 
 }
