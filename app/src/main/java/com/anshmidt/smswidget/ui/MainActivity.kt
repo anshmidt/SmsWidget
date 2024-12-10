@@ -9,15 +9,35 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -68,8 +88,11 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     private fun Content() {
-        val isPermissionGranted by viewModel.permissionGranted.observeAsState(initial = isSmsPermissionGranted())
+        val isPermissionGranted by viewModel.permissionGranted.observeAsState(
+            initial = isSmsPermissionGranted()
+        )
         val isPermissionDenied by viewModel.permissionDenied.observeAsState(initial = false)
+        val uiState by viewModel.uiState.observeAsState(UiState(emptyList()))
 
         if (isPermissionDenied) {
             SmsPermissionDeniedScreen()
@@ -77,7 +100,10 @@ class MainActivity : ComponentActivity() {
         }
 
         if (isPermissionGranted) {
-            NormalScreen()
+            NormalScreen(
+                uiState = uiState,
+                onNewMessageAdded = { newMessage -> viewModel.onNewMessageAdded(newMessage) }
+            )
         } else {
             AskSmsPermissionScreen()
         }
@@ -133,21 +159,26 @@ class MainActivity : ComponentActivity() {
 
 
     @Composable
-    private fun NormalScreen() {
+    private fun NormalScreen(
+        uiState: UiState,
+        onNewMessageAdded: (messageEntity: MessageEntity) -> Unit
+    ) {
         var showAddDialog by remember { mutableStateOf(false) }
 
         Scaffold(
             floatingActionButton = {
                 AddButton(onAddButtonClicked = { showAddDialog = true })
             }
-        ) {
+        ) { contentPadding ->
             Surface(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(contentPadding),
                 color = MaterialTheme.colorScheme.background
             ) {
                 Row {
                     Text("SmsWidget")
-                    MessageList()
+                    MessageList(uiState.messages)
                 }
             }
         }
@@ -159,7 +190,10 @@ class MainActivity : ComponentActivity() {
             ) {
                 AddDialogContent(
                     onCancelButtonClicked = { showAddDialog = false },
-                    onSaveButtonClicked = { showAddDialog = false }
+                    onSaveButtonClicked = { newMessage ->
+                        onNewMessageAdded(newMessage)
+                        showAddDialog = false
+                    }
                 )
             }
         }
@@ -168,44 +202,89 @@ class MainActivity : ComponentActivity() {
     @Composable
     private fun AddDialogContent(
         onCancelButtonClicked: () -> Unit,
-        onSaveButtonClicked: () -> Unit
+        onSaveButtonClicked: (messageEntity: MessageEntity) -> Unit
     ) {
+        var phoneNumber by remember { mutableStateOf("9011") }
+        var message by remember { mutableStateOf("A90") }
+        var caption by remember { mutableStateOf("9011: A90") }
+
         Column(
             modifier = Modifier
                 .background(Black600)
                 .padding(24.dp)
                 .fillMaxSize()
         ) {
-            TextField(
-                value = "9011",
-                onValueChange = {},
-                label = { Text("Phone number") },
-                modifier = Modifier.fillMaxWidth().padding(16.dp),
-                colors = TextFieldDefaults.colors(
-                    focusedTextColor = MaterialTheme.colorScheme.onBackground,
-                    unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
-                    focusedContainerColor = MaterialTheme.colorScheme.background,
-                    unfocusedContainerColor = MaterialTheme.colorScheme.background
-                )
+            AddDialogTextField(
+                label = "Phone number",
+                text = phoneNumber,
+                onValueChange = { phoneNumber = it }
             )
-            TextField(value = "A90", onValueChange = {})
-            TextField(value = "9011: A90", onValueChange = {})
-            Button(
-                onClick = onCancelButtonClicked,
+            AddDialogTextField(
+                label = "Message",
+                text = message,
+                onValueChange = { message = it }
+            )
+            AddDialogTextField(
+                label = "Caption",
+                text = caption,
+                onValueChange = { caption = it }
+            )
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth()
             ) {
-                Text("Cancel")
+                Button(
+                    onClick = onCancelButtonClicked,
+                ) {
+                    Text("Cancel")
+                }
+                Button(
+                    onClick = { onSaveButtonClicked(MessageEntity(
+                        phoneNumber = phoneNumber,
+                        messageText = message,
+                        caption = caption
+                    )) }
+                ) {
+                    Text("Save")
+                }
             }
-            Button(
-                onClick = onSaveButtonClicked
-            ) {
-                Text("Save")
-            }
+
         }
     }
 
     @Composable
-    private fun MessageList() {
+    private fun AddDialogTextField(label: String, text: String, onValueChange: (String) -> Unit) {
+        TextField(
+            value = text,
+            onValueChange = onValueChange,
+            label = { Text(label) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            colors = TextFieldDefaults.colors(
+                focusedTextColor = MaterialTheme.colorScheme.onBackground,
+                unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
+                focusedContainerColor = MaterialTheme.colorScheme.background,
+                unfocusedContainerColor = MaterialTheme.colorScheme.background,
+                focusedLabelColor = MaterialTheme.colorScheme.onBackground,
+                unfocusedLabelColor = MaterialTheme.colorScheme.onBackground
+            )
+        )
+    }
 
+    @Composable
+    private fun MessageList(messages: List<MessageEntity>) {
+        LazyColumn {
+            items(messages.size) { index ->
+                Message(
+                    messageEntity = messages[index],
+                    onEditButtonClicked = { },
+                    onDeleteButtonClicked = { }
+                )
+            }
+        }
     }
 
     @Composable

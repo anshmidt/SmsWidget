@@ -8,7 +8,7 @@ import androidx.room.PrimaryKey
 data class MessageEntity(
     @ColumnInfo(name = ID_COLUMN)
     @PrimaryKey(autoGenerate = true)
-    val id: Int,
+    val id: Int = 0,
 
     @ColumnInfo(name = PHONE_NUMBER_COLUMN)
     val phoneNumber: String,
